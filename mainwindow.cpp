@@ -169,7 +169,7 @@ void MainWindow::on_actionRun_triggered()
         //mutex.lock();
         if(true == this->text_update){
             this->text_update = false;
-            while(!this->quedata.isEmpty()){
+            while(!this->quedata.isEmpty()&& 540 > this->src_data.length){
                 src_data.append(this->quedata.dequeue());
             }
             this->strData = this->src_data.toHex(' ')+' ';
