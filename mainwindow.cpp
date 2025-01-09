@@ -107,8 +107,17 @@ void MainWindow::on_actionRun_triggered()
     ui->actionStop->setEnabled(true);
     ui->sendButton->setEnabled(true);
 
+    QFile file("example2.txt");
+    static char flag = 0;
+    if(flag == 0)
+    {
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+    }
+    QTextStream outa(&file);
+
+
     // 使用lambda表达式进行类型转换并连接信号和槽
-    QObject::connect(dynamic_cast<PortRs232 *>(port), &PortRs232::newData, [this](const QByteArray& data) {
+    QObject::connect(dynamic_cast<PortRs232 *>(port), &PortRs232::newData, [this,outa](const QByteArray& data) {
         mutex.lock();
         //if(false == this->text_update){
         if(1){
@@ -116,20 +125,26 @@ void MainWindow::on_actionRun_triggered()
             if(ui->checkBoxRHex->isChecked()){
                 this->quedata.enqueue(data);
 
-                // while(!this->quedata.isEmpty() && 5400 > src_data.length()){
-                //     src_data.append(this->quedata.dequeue());
-                // }
+                while(!this->quedata.isEmpty() && 540 > src_data.length()){
+                    src_data.append(this->quedata.dequeue());
+                }
 
-                // if(src_data.length() >= 5400){
-                //     this->strData = this->src_data.toHex(' ')+' ';
-                //     this->src_data.clear();
-                //     //this->ui->dataText->textCursor().movePosition(QTextCursor::End);
-                //     this->ui->dataText->insertPlainText(this->strData);
-                //     this->strData.clear();
-                //     // 获取垂直滚动条并滚动到最底部
-                //     QScrollBar *scrollBar = this->ui->dataText->verticalScrollBar();
-                //     scrollBar->setValue(scrollBar->maximum());
-                // }
+                if(src_data.length() >= 540){
+                    this->strData = this->src_data.toHex(' ')+' ';
+
+
+                    outa << this->strData;
+                    this->src_data.clear();
+
+
+                    this->src_data.clear();
+                    //this->ui->dataText->textCursor().movePosition(QTextCursor::End);
+                    this->ui->dataText->insertPlainText(this->strData);
+                    this->strData.clear();
+                    // 获取垂直滚动条并滚动到最底部
+                    QScrollBar *scrollBar = this->ui->dataText->verticalScrollBar();
+                    scrollBar->setValue(scrollBar->maximum());
+                }
 
 
                 //this->src_data.append(data);
@@ -193,7 +208,7 @@ void MainWindow::on_actionRun_triggered()
         }
         //mutex.unlock();
     });
-    timer->start(1000);
+    //timer->start(1000);
 
     //Startup send
     QString send_run = config->get("_setup_","send_run","").trimmed();
