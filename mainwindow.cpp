@@ -173,15 +173,18 @@ void MainWindow::on_actionRun_triggered()
                 src_data.append(this->quedata.dequeue());
             }
             this->strData = this->src_data.toHex(' ')+' ';
+            QFile file("example2.txt");
+            static char flag = 0;
+            if(flag == 0)
+            {
+            file.open(QIODevice::WriteOnly | QIODevice::Text);
+            }
+            QTextStream outa(&file);
+            outa << this->strData;
             this->src_data.clear();
 
-            QTextCursor cursor = this->ui->dataText->textCursor();
-            cursor.movePosition(QTextCursor::End);
-            this->ui->dataText->setTextCursor(cursor);
+            this->ui->dataText->textCursor().movePosition(QTextCursor::End);
             this->ui->dataText->insertPlainText(this->strData);
-
-            //this->ui->dataText->textCursor().movePosition(QTextCursor::End);
-            //this->ui->dataText->insertPlainText(this->strData);
             this->strData.clear();
 
             // 获取垂直滚动条并滚动到最底部
